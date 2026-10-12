@@ -125,6 +125,7 @@ def ecrire(run: datetime, indexes, points, par_dep, n_communes: int, stats, sort
             "dataset": "ECMWF Open Data — AIFS ENS",
             "members": MEMBERS,
             "resolution_degrees": 0.25,
+            "forecast_hours_requested": STEPS[-1],
             "run_time": iso(run),
             "source_url": "https://www.ecmwf.int/en/forecasts/datasets/open-data",
             "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
