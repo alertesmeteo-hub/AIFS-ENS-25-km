@@ -1,0 +1,83 @@
+name: Produire les tableaux AIFS ENS
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Reconstruire même si le run est déjà publié"
+        type: boolean
+        default: false
+  schedule:
+    # Runs 00/06/12/18 UTC complets (H+360) vers +7 h 40 : passage 10 min après.
+    - cron: "50 1,7,13,19 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aifs-ens-publication
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      TQDM_DISABLE: "1"
+      PYTHONUNBUFFERED: "1"
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: python -m pip install --disable-pip-version-check -r requirements.txt
+
+      - name: Vérifier le code
+        run: python -m unittest discover -s tests
+
+      - name: Extraire les 51 membres et calculer les statistiques
+        id: build
+        run: |
+          # Coupures passagères de la source (connexion fermée, 429/5xx, délai dépassé) : jusqu'à 3 tentatives.
+          set -o pipefail
+          force=""
+          if [ "${{ inputs.force }}" = "true" ]; then force="--force"; fi
+          for attempt in 1 2 3; do
+            if python scripts/build_data.py $force 2>&1 | tee "$RUNNER_TEMP/tentative.log"; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ] || ! grep -qiE 'RemoteDisconnected|Connection(Error|Reset|refused| aborted)|IncompleteRead|ReadTimeout|ConnectTimeout|ChunkedEncodingError|ProtocolError|Max retries exceeded|Temporary failure in name resolution|Name or service not known|SSLError|HTTP ?(Error)?:? ?(429|500|502|503|504)|(429|502|503|504) (Too Many|Bad Gateway|Service Unavailable|Gateway Time|Server)|Server is busy|ECONNRESET|ETIMEDOUT|EAI_AGAIN|fetch failed|socket hang up|timed out|Read timed' "$RUNNER_TEMP/tentative.log"; then
+              echo "::error::Échec (tentative $attempt)"
+              exit 1
+            fi
+            echo "Erreur réseau passagère (tentative $attempt), nouvelle tentative dans 90 s"
+            sleep 90
+          done
+          if [ -f build/data/index.json ]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Valider la publication complète
+        if: steps.build.outputs.publish == 'true'
+        run: cd scripts && python validate_data.py ../build/data
+
+      # Branche data réécrite à chaque run (un seul commit) : le dépôt ne grossit pas.
+      - name: Publier sur la branche data
+        if: steps.build.outputs.publish == 'true'
+        run: |
+          run=$(python -c "import json; print(json.load(open('build/data/index.json'))['run'])")
+          cd build/data
+          touch .nojekyll
+          git init -q -b data
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -q -m "Publication AIFS ENS validée : run ${run}, 51 membres"
+          git push -q --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:data
+          du -sh .
