@@ -4,6 +4,7 @@ Même format « points + communes » que les autres ensembles (PEARP, GEFS, AIGE
 département, `forecast` = moyenne, `forecast_statistics` = médiane, p10, p90. Colonnes :
 température à 2 m (°C), pluie des 6 dernières heures (mm, absente à H+0) et pluie cumulée depuis
 le run (mm). Les statistiques sont calculées membre par membre puis sur les 51 membres.
+Pour quelques départements (DEPS_MEMBRES), les 51 membres sont aussi publiés tels quels dans membres/XX.json.
 """
 from __future__ import annotations
 
@@ -21,9 +22,12 @@ import requests
 
 from source import MEMBERS, STEPS, decode, grid_index, latest_run, retrieve
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 REPO = "alertesmeteo-hub/AIFS-ENS-25-km"
 COLONNES = ["temperature_c", "precipitation_mm", "precipitation_total_mm"]
+COLONNES_MEMBRES = ["temperature_c", "precipitation_total_mm"]
+# Départements dont les 51 membres sont aussi publiés tels quels (membres/XX.json) : voir ecrire_membres.
+DEPS_MEMBRES = ("66",)
 STATISTIQUES = ("mean", "median", "p10", "p90")
 CATALOGUE = Path(__file__).resolve().parent.parent / "config" / "communes-france.json"
 
@@ -79,7 +83,41 @@ def lignes(stats: dict[str, dict[str, np.ndarray]], stat: str, k: int, ids: list
     return out
 
 
-def ecrire(run: datetime, indexes, points, par_dep, n_communes: int, stats, sortie: Path) -> dict:
+def ecrire_membres(run: datetime, indexes, points, par_dep, temperature: np.ndarray, cumul: np.ndarray, codes, sortie: Path) -> None:
+    """Valeurs des 51 membres pour quelques départements (membres/XX.json), en plus des statistiques.
+
+    Les quantiles d'une pluie du jour ne se déduisent pas de ceux des cumuls : le p90 du cumul du soir moins le p90 du
+    cumul du matin n'est pas le p90 de la pluie de la journée (il peut même valoir 0 quand la moyenne annonce de la
+    pluie). L'aval (communes-data) calcule donc chaque jour membre par membre, puis les quantiles.
+    Mêmes points et communes que departements/XX.json ; values[membre][échéance][point] = [température, cumul].
+    """
+    position = {idx: i for i, idx in enumerate(indexes)}
+    (sortie / "membres").mkdir(parents=True, exist_ok=True)
+    for code in codes:
+        entrees = par_dep[code]
+        idx_dep = sorted({idx for _, idx in entrees})
+        local = {idx: j for j, idx in enumerate(idx_dep)}
+        ids = [position[idx] for idx in idx_dep]
+        payload = {
+            "schema_version": 1,
+            "department": code,
+            "members": MEMBERS,
+            "run_time": iso(run),
+            "times": [iso(run + timedelta(hours=h)) for h in STEPS],
+            "columns": COLONNES_MEMBRES,
+            "points": [[idx, points[idx][0], points[idx][1], None] for idx in idx_dep],
+            "communes": [[c[0], c[1], c[3], c[4], c[5], c[6], local[idx]] for c, idx in entrees],
+            "values": [
+                [[[round(float(temperature[m, k, i]), 1), round(float(cumul[m, k, i]), 2)] for i in ids] for k in range(len(STEPS))]
+                for m in range(MEMBERS)
+            ],
+        }
+        (sortie / "membres" / f"{code}.json").write_text(
+            json.dumps(payload, ensure_ascii=False, separators=(",", ":"), allow_nan=False), encoding="utf-8"
+        )
+
+
+def ecrire(run: datetime, indexes, points, par_dep, n_communes: int, stats, sortie: Path, membres=()) -> dict:
     position = {idx: i for i, idx in enumerate(indexes)}
     (sortie / "departements").mkdir(parents=True, exist_ok=True)
     colonnes = {
@@ -136,6 +174,7 @@ def ecrire(run: datetime, indexes, points, par_dep, n_communes: int, stats, sort
         "statistics": list(STATISTIQUES),
         "commune_count": n_communes,
         "departments": deps,
+        "member_departments": list(membres),
         "limitations": "Température à 2 m toutes les 6 h (pas de Tmax/Tmin publiées), pluie sur 6 h et cumulée depuis le run. "
         "Pas de rafales ni de neige. Statistiques des 51 membres (contrôle + 50 perturbés), pas un scénario déterministe.",
     }
@@ -210,7 +249,8 @@ def main() -> int:
     }
     for s, v in statistiques(pluie[:, 1:]).items():
         stats["pluie"][s][1:] = v
-    index = ecrire(run, indexes, points, par_dep, n_communes, stats, Path(a.out_dir))
+    ecrire_membres(run, indexes, points, par_dep, temperature, cumul, DEPS_MEMBRES, Path(a.out_dir))
+    index = ecrire(run, indexes, points, par_dep, n_communes, stats, Path(a.out_dir), DEPS_MEMBRES)
     print(f"Publication prête : run {index['run']}, {index['commune_count']} communes, {len(index['departments'])} départements", flush=True)
     return 0
 

@@ -29,8 +29,20 @@ celle des 4 valeurs de 6 h (légère sous-estimation des extrêmes).
   `temperature_c`, `precipitation_mm` (6 h, absente à H+0), `precipitation_total_mm`.
   `forecast` = moyenne des 51 membres ; `forecast_statistics` = `median`, `p10`, `p90`.
 
+- `membres/66.json` : les 51 membres tels quels (mêmes points et communes que
+  `departements/66.json`) : `values[membre][échéance][point]` = `[temperature_c,
+  precipitation_total_mm]`. Liste des départements concernés : `member_departments`
+  de `index.json` (constante `DEPS_MEMBRES`).
+
 Les statistiques sont calculées membre par membre puis sur les 51 membres
 (pluie 6 h et cumul calculés pour chaque membre avant les quantiles).
+
+Pourquoi publier les membres : les quantiles d'une pluie du jour ne se déduisent
+pas de ceux des cumuls. Le p90 du cumul du soir moins le p90 du cumul du matin
+n'est pas le p90 de la pluie de la journée ; il peut même valoir 0 alors que la
+moyenne annonce plusieurs millimètres. La synthèse par commune (`communes-data`
+du dépôt harmonie-knmi) calcule donc la pluie, la Tmax et la Tmin de chaque jour
+(heure de Paris) membre par membre, puis la moyenne, le p10 et le p90.
 
 ## Production
 

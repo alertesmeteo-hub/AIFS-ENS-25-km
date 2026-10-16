@@ -7,7 +7,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from build_data import COLONNES, run_publie
+from build_data import COLONNES, COLONNES_MEMBRES, DEPS_MEMBRES, run_publie
 from source import MEMBERS, STEPS
 
 racine = Path(sys.argv[1] if len(sys.argv) > 1 else "build/data")
@@ -49,4 +49,27 @@ for f in fichiers:
                 for s in ("p10", "median", "p90"):
                     assert series[s][k][1][i][2] >= series[s][k - 1][1][i][2] - 0.011, f"{f.name} {s} : cumul décroissant"
 assert communes == index["commune_count"], f"{communes} communes au lieu de {index['commune_count']}"
-print(f"Validation OK : run {index['run']}, {communes} communes, {len(fichiers)} départements, {len(STEPS)} échéances, {MEMBERS} membres.")
+
+# Membres publiés tels quels : mêmes points et communes que le fichier du département, cumuls croissants,
+# et leur moyenne redonne la moyenne publiée (à l'arrondi près).
+assert index["member_departments"] == list(DEPS_MEMBRES)
+for code in index["member_departments"]:
+    m = json.loads((racine / "membres" / f"{code}.json").read_text(encoding="utf-8"))
+    dep = json.loads((racine / "departements" / f"{code}.json").read_text(encoding="utf-8"))
+    assert m["members"] == MEMBERS == len(m["values"]) and m["run_time"] == index["run"]
+    assert m["columns"] == COLONNES_MEMBRES and len(m["times"]) == len(STEPS)
+    assert [t for t, _ in dep["forecast"]] == m["times"]
+    assert m["points"] == dep["points"] and m["communes"] == dep["communes"], f"membres/{code}.json : points ou communes différents"
+    for n, membre in enumerate(m["values"]):
+        assert len(membre) == len(STEPS), f"membre {n} : {len(membre)} échéances"
+        for k, pts in enumerate(membre):
+            assert len(pts) == len(m["points"])
+            for i, (temp, cum) in enumerate(pts):
+                assert math.isfinite(temp) and -80 < temp < 60, f"membre {n} H+{STEPS[k]} : {temp} °C"
+                assert cum <= 0.01 if k == 0 else cum >= membre[k - 1][i][1], f"membre {n} H+{STEPS[k]} : cumul {cum}"
+    for k in range(len(STEPS)):
+        for i in range(len(m["points"])):
+            moy = sum(mb[k][i][0] for mb in m["values"]) / MEMBERS
+            assert abs(moy - dep["forecast"][k][1][i][0]) < 0.06, f"membres/{code}.json H+{STEPS[k]} : moyenne {moy:.2f} ≠ {dep['forecast'][k][1][i][0]}"
+print(f"Validation OK : run {index['run']}, {communes} communes, {len(fichiers)} départements, {len(STEPS)} échéances, {MEMBERS} membres"
+      f" (membres publiés : {', '.join(index['member_departments'])}).")

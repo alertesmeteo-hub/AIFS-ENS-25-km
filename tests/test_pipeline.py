@@ -86,5 +86,38 @@ class Statistiques(unittest.TestCase):
         self.assertEqual(build_data.COLONNES, ["temperature_c", "precipitation_mm", "precipitation_total_mm"])
 
 
+class Membres(unittest.TestCase):
+    def test_membres_publies_tels_quels_dans_l_ordre_du_departement(self):
+        import json
+        import tempfile
+
+        from source import STEPS
+
+        # 3 points de grille dans le catalogue ; le 66 n'en utilise que 2 (indices 30 puis 10 dans l'ordre des communes)
+        indexes = [10, 20, 30]
+        points = {10: (42.5, 2.75), 20: (43.0, 1.0), 30: (42.75, 3.0)}
+        c1 = ["66136", "Perpignan", "66", ["66000"], 121616, 42.699, 2.9045]
+        c2 = ["66025", "Bourg-Madame", "66", ["66760"], 1300, 42.43, 1.94]
+        par_dep = {"66": [(c1, 30), (c2, 10)], "11": [(["11069", "Carcassonne", "11", ["11000"], 46000, 43.21, 2.35], 20)]}
+        temperature = np.zeros((MEMBERS, len(STEPS), 3))
+        cumul = np.zeros((MEMBERS, len(STEPS), 3))
+        temperature[7, 4, 2] = 21.26  # membre 7, H+24, point 30
+        cumul[7, 4:, 2] = 3.456
+        with tempfile.TemporaryDirectory() as d:
+            build_data.ecrire_membres(RUN, indexes, points, par_dep, temperature, cumul, ["66"], Path(d))
+            m = json.loads((Path(d) / "membres" / "66.json").read_text(encoding="utf-8"))
+            self.assertFalse((Path(d) / "membres" / "11.json").exists())
+        self.assertEqual(m["members"], MEMBERS)
+        self.assertEqual(len(m["values"]), MEMBERS)
+        self.assertEqual(len(m["times"]), len(STEPS))
+        self.assertEqual(m["times"][4], "2026-10-13T06:00:00Z")
+        self.assertEqual(m["points"], [[10, 42.5, 2.75, None], [30, 42.75, 3.0, None]])
+        self.assertEqual([c[0] for c in m["communes"]], ["66136", "66025"])
+        self.assertEqual([c[-1] for c in m["communes"]], [1, 0])  # Perpignan -> point 30, 2e point du département
+        self.assertEqual(m["values"][7][4][1], [21.3, 3.46])
+        self.assertEqual(m["values"][7][3][1], [0.0, 0.0])
+        self.assertEqual(m["values"][0][4][0], [0.0, 0.0])
+
+
 if __name__ == "__main__":
     unittest.main()
