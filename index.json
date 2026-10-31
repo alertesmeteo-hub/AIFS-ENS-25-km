@@ -1,0 +1,484 @@
+{
+ "schema_version": 4,
+ "status": "ok",
+ "version": "1.1.0",
+ "run": "2026-10-31T06:00:00Z",
+ "generated_at": "2026-10-31T13:59:46Z",
+ "model": {
+  "name": "AIFS ENS (ECMWF, IA)",
+  "provider": "ECMWF",
+  "dataset": "ECMWF Open Data — AIFS ENS",
+  "members": 51,
+  "resolution_degrees": 0.25,
+  "forecast_hours_requested": 360,
+  "run_time": "2026-10-31T06:00:00Z",
+  "source_url": "https://www.ecmwf.int/en/forecasts/datasets/open-data",
+  "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+ },
+ "members": 51,
+ "table_steps": [
+  0,
+  6,
+  12,
+  18,
+  24,
+  30,
+  36,
+  42,
+  48,
+  54,
+  60,
+  66,
+  72,
+  78,
+  84,
+  90,
+  96,
+  102,
+  108,
+  114,
+  120,
+  126,
+  132,
+  138,
+  144,
+  150,
+  156,
+  162,
+  168,
+  174,
+  180,
+  186,
+  192,
+  198,
+  204,
+  210,
+  216,
+  222,
+  228,
+  234,
+  240,
+  246,
+  252,
+  258,
+  264,
+  270,
+  276,
+  282,
+  288,
+  294,
+  300,
+  306,
+  312,
+  318,
+  324,
+  330,
+  336,
+  342,
+  348,
+  354,
+  360
+ ],
+ "columns": [
+  "temperature_c",
+  "precipitation_mm",
+  "precipitation_total_mm"
+ ],
+ "statistics": [
+  "mean",
+  "median",
+  "p10",
+  "p90"
+ ],
+ "commune_count": 34746,
+ "departments": {
+  "01": {
+   "communes": 391,
+   "points": 19
+  },
+  "02": {
+   "communes": 797,
+   "points": 24
+  },
+  "03": {
+   "communes": 317,
+   "points": 26
+  },
+  "04": {
+   "communes": 198,
+   "points": 23
+  },
+  "05": {
+   "communes": 162,
+   "points": 17
+  },
+  "06": {
+   "communes": 163,
+   "points": 12
+  },
+  "07": {
+   "communes": 335,
+   "points": 16
+  },
+  "08": {
+   "communes": 447,
+   "points": 19
+  },
+  "09": {
+   "communes": 325,
+   "points": 15
+  },
+  "10": {
+   "communes": 431,
+   "points": 19
+  },
+  "11": {
+   "communes": 433,
+   "points": 20
+  },
+  "12": {
+   "communes": 285,
+   "points": 26
+  },
+  "13": {
+   "communes": 119,
+   "points": 16
+  },
+  "14": {
+   "communes": 526,
+   "points": 23
+  },
+  "15": {
+   "communes": 250,
+   "points": 16
+  },
+  "16": {
+   "communes": 359,
+   "points": 18
+  },
+  "17": {
+   "communes": 462,
+   "points": 25
+  },
+  "18": {
+   "communes": 286,
+   "points": 22
+  },
+  "19": {
+   "communes": 277,
+   "points": 18
+  },
+  "21": {
+   "communes": 698,
+   "points": 28
+  },
+  "22": {
+   "communes": 344,
+   "points": 21
+  },
+  "23": {
+   "communes": 255,
+   "points": 18
+  },
+  "24": {
+   "communes": 503,
+   "points": 28
+  },
+  "25": {
+   "communes": 563,
+   "points": 19
+  },
+  "26": {
+   "communes": 362,
+   "points": 22
+  },
+  "27": {
+   "communes": 585,
+   "points": 22
+  },
+  "28": {
+   "communes": 363,
+   "points": 20
+  },
+  "29": {
+   "communes": 277,
+   "points": 28
+  },
+  "2A": {
+   "communes": 124,
+   "points": 12
+  },
+  "2B": {
+   "communes": 236,
+   "points": 15
+  },
+  "30": {
+   "communes": 350,
+   "points": 18
+  },
+  "31": {
+   "communes": 586,
+   "points": 23
+  },
+  "32": {
+   "communes": 458,
+   "points": 22
+  },
+  "33": {
+   "communes": 534,
+   "points": 25
+  },
+  "34": {
+   "communes": 341,
+   "points": 21
+  },
+  "35": {
+   "communes": 332,
+   "points": 24
+  },
+  "36": {
+   "communes": 241,
+   "points": 18
+  },
+  "37": {
+   "communes": 272,
+   "points": 19
+  },
+  "38": {
+   "communes": 512,
+   "points": 24
+  },
+  "39": {
+   "communes": 492,
+   "points": 18
+  },
+  "40": {
+   "communes": 327,
+   "points": 26
+  },
+  "41": {
+   "communes": 267,
+   "points": 22
+  },
+  "42": {
+   "communes": 320,
+   "points": 19
+  },
+  "43": {
+   "communes": 257,
+   "points": 17
+  },
+  "44": {
+   "communes": 207,
+   "points": 21
+  },
+  "45": {
+   "communes": 325,
+   "points": 22
+  },
+  "46": {
+   "communes": 312,
+   "points": 17
+  },
+  "47": {
+   "communes": 319,
+   "points": 18
+  },
+  "48": {
+   "communes": 152,
+   "points": 15
+  },
+  "49": {
+   "communes": 176,
+   "points": 21
+  },
+  "50": {
+   "communes": 445,
+   "points": 22
+  },
+  "51": {
+   "communes": 610,
+   "points": 27
+  },
+  "52": {
+   "communes": 426,
+   "points": 21
+  },
+  "53": {
+   "communes": 240,
+   "points": 18
+  },
+  "54": {
+   "communes": 591,
+   "points": 20
+  },
+  "55": {
+   "communes": 499,
+   "points": 20
+  },
+  "56": {
+   "communes": 249,
+   "points": 26
+  },
+  "57": {
+   "communes": 725,
+   "points": 24
+  },
+  "58": {
+   "communes": 309,
+   "points": 20
+  },
+  "59": {
+   "communes": 647,
+   "points": 25
+  },
+  "60": {
+   "communes": 680,
+   "points": 22
+  },
+  "61": {
+   "communes": 381,
+   "points": 20
+  },
+  "62": {
+   "communes": 887,
+   "points": 26
+  },
+  "63": {
+   "communes": 463,
+   "points": 23
+  },
+  "64": {
+   "communes": 545,
+   "points": 23
+  },
+  "65": {
+   "communes": 469,
+   "points": 14
+  },
+  "66": {
+   "communes": 226,
+   "points": 15
+  },
+  "67": {
+   "communes": 514,
+   "points": 19
+  },
+  "68": {
+   "communes": 366,
+   "points": 12
+  },
+  "69": {
+   "communes": 266,
+   "points": 11
+  },
+  "70": {
+   "communes": 536,
+   "points": 20
+  },
+  "71": {
+   "communes": 563,
+   "points": 26
+  },
+  "72": {
+   "communes": 352,
+   "points": 19
+  },
+  "73": {
+   "communes": 273,
+   "points": 17
+  },
+  "74": {
+   "communes": 279,
+   "points": 16
+  },
+  "75": {
+   "communes": 1,
+   "points": 1
+  },
+  "76": {
+   "communes": 707,
+   "points": 21
+  },
+  "77": {
+   "communes": 507,
+   "points": 17
+  },
+  "78": {
+   "communes": 259,
+   "points": 10
+  },
+  "79": {
+   "communes": 252,
+   "points": 19
+  },
+  "80": {
+   "communes": 771,
+   "points": 21
+  },
+  "81": {
+   "communes": 314,
+   "points": 19
+  },
+  "82": {
+   "communes": 195,
+   "points": 13
+  },
+  "83": {
+   "communes": 153,
+   "points": 18
+  },
+  "84": {
+   "communes": 151,
+   "points": 13
+  },
+  "85": {
+   "communes": 253,
+   "points": 24
+  },
+  "86": {
+   "communes": 265,
+   "points": 23
+  },
+  "87": {
+   "communes": 195,
+   "points": 18
+  },
+  "88": {
+   "communes": 506,
+   "points": 22
+  },
+  "89": {
+   "communes": 423,
+   "points": 23
+  },
+  "90": {
+   "communes": 101,
+   "points": 4
+  },
+  "91": {
+   "communes": 194,
+   "points": 9
+  },
+  "92": {
+   "communes": 36,
+   "points": 2
+  },
+  "93": {
+   "communes": 39,
+   "points": 3
+  },
+  "94": {
+   "communes": 47,
+   "points": 2
+  },
+  "95": {
+   "communes": 183,
+   "points": 8
+  }
+ },
+ "member_departments": [
+  "66"
+ ],
+ "limitations": "Température à 2 m toutes les 6 h (pas de Tmax/Tmin publiées), pluie sur 6 h et cumulée depuis le run. Pas de rafales ni de neige. Statistiques des 51 membres (contrôle + 50 perturbés), pas un scénario déterministe."
+}
